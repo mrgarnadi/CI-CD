@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Produk Kami</title>
+</head>
+<body>
+    <h1>Daftar Produk</h1>
+    {% for name, price, image_url in products %}
+        <div>
+            <h2>{{ name }}</h2>
+            <img src="{{ image_url }}" alt="{{ name }}" width="200">
+            <p>Harga: Rp {{ price }}</p>
+        </div>
+    {% endfor %}
+</body>
+</html>
