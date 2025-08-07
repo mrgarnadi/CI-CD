@@ -1,0 +1,36 @@
+# .github/workflows/deploy.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main  # Jalan setiap ada push ke cabang 'main'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Login to DockerHub
+      run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.danang008 }} --password-stdin
+
+    - name: Build Docker image
+      run: docker build -t ${{ secrets.danang008 }}/cloud-comp .
+
+    - name: Push to DockerHub
+      run: docker push ${{ secrets.danang008 }}/cloud-comp
+
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ec2-user
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          docker pull ${{ secrets.danang008 }}/cloud-comp
+          docker stop cloud || true
+          docker rm cloud || true
+          docker run -d --name cloud -p 80:80 ${{ secrets.danang008 }}/cloud-comp
